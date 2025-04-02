@@ -1,3 +1,12 @@
+rag_app/chroma_db
+rag_app/Plain_Text
+
+data/body_xml
+data/json
+data/pdfs
+data/Plain_Text
+data/xml_output
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
