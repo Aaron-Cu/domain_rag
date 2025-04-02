@@ -23,4 +23,4 @@ def rag_chain(message: str, vectorstore, mode="APP"):
 
 def llm_chat(messages, url, stream=False):
     logger.info("Calling LLM endpoint...")
-    return requests.post(url, json={"model": "llama3", "messages": messages, "stream": stream}, stream=stream)
+    return requests.post(url, json={"model": "", "messages": messages}, stream=stream)

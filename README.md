@@ -186,6 +186,82 @@ pip install Flask torch langchain langchain-community chromadb sentence-transfor
 
 ---
 
+## 🧩 Question-Answer Generation Pipeline Helper Module
+
+This module provides a fully automated pipeline for generating scenario-based **questions and answers** using a **local LLM (via LM Studio)** and a lightweight RAG setup. The output is structured and saved as a Pandas DataFrame for further use or export.
+
+---
+
+### 📦 Features
+
+- ✅ Generate **casual, practical questions** from context
+- ✅ Generate **concise answers** using a RAG model/client
+- ✅ Process `.json` files in bulk
+- ✅ Handles malformed JSON responses with a built-in fixer
+- ✅ Optionally includes annotation fields for manual review
+
+---
+
+### 📁 Input Format
+
+Each input `.json` file must contain a list of dictionaries with at least a `Chunk` field. Optionally include a `Title`.
+
+```json
+[
+  {
+    "Title": "Understanding ML",
+    "Chunk": "Machine learning is a method of data analysis that automates analytical model building."
+  }
+]
+```
+
+---
+
+### 🚀 How to Use
+
+#### 1. **Import the module**
+```python
+from helpers.qag_util import process_all
+```
+
+#### 2. **Run the pipeline**
+```python
+df = process_all("path/to/your/json/files")
+df.to_csv("generated_qa.csv", index=False)
+```
+
+---
+
+### 📝 Output Columns
+
+| Column      | Description                                                   |
+|-------------|---------------------------------------------------------------|
+| `question`  | Generated scenario-based question                             |
+| `answer`    | Answer generated using a second client (e.g. local RAG app)   |
+| `head`      | Title of the context chunk (if provided)                      |
+| `text`      | Original input text chunk                                     |
+
+---
+
+### ⚙️ Requirements
+
+- [LM Studio](https://lmstudio.ai/) running locally with a chat-compatible LLM
+- Previously Mentioned RAG app
+- Python packages:
+  - `pandas`
+  - `nltk`
+  - `langchain`
+  - `scipy`, `sklearn`
+  - `tqdm`
+  - `pydantic`
+- Download required NLTK data:
+```python
+import nltk
+nltk.download('punkt')
+```
+
+---
+
 ## 🧐 Future Extensions
 
 - Add support for metadata indexing (authors, year, abstract).
