@@ -4,7 +4,7 @@
 
 ---
 
-## 📦 Project Structure
+## 📆 Project Structure
 
 ```
 domain_rag/
@@ -87,6 +87,102 @@ Or with Docker:
 ```bash
 docker run -t --rm -p 8070:8070 lfoppiano/grobid
 ```
+
+---
+
+## 💬 Flask-Based RAG Chat Server
+
+After running the data pre-processing pipeline (using GROBID and TEI utilities), you can launch an interactive RAG (Retrieval-Augmented Generation) system using the included Flask app.
+
+### 🧠 Features
+
+- Uses [LangChain](https://github.com/langchain-ai/langchain) with Chroma for vector search  
+- Embedding model: `BAAI/bge-m3` via `sentence-transformers`  
+- Automatically loads and splits `.pdf` and `.txt` files  
+- Domain-specific prompt templates (e.g., dementia care)  
+- LM Studio support with both streaming and non-streaming chat  
+- Context citations and basic emergency tagging  
+
+### 🗂️ Structure
+
+```
+rag_app/
+├── app.py                      # Main Flask application
+├── services/                   # Modular service files
+│   ├── config.py
+│   ├── embedding_utils.py
+│   ├── file_utils.py
+│   ├── vectorstore_utils.py
+│   └── llm_utils.py
+└── Plain_Text/                 # Input files for processing (PDFs or TXT)
+```
+
+### 🚀 Getting Started
+
+```bash
+cd rag_app
+pip install -r requirements.txt
+python app.py
+```
+
+### 🛠 Additional Requirements
+
+These packages are needed for the RAG app portion:
+
+```
+Flask
+torch
+langchain
+langchain-community
+chromadb
+sentence-transformers
+PyPDF2
+requests
+```
+
+Install them with:
+
+```bash
+pip install Flask torch langchain langchain-community chromadb sentence-transformers PyPDF2 requests
+```
+
+### ▶️ How to Start the RAG App
+
+1. Navigate to the app folder:
+   ```bash
+   cd rag_app
+   ```
+
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Add your `.txt` or `.pdf` files to the `Plain_Text/` folder:
+   ```
+   rag_app/
+   └── Plain_Text/
+       ├── example1.txt
+       └── example2.pdf
+   ```
+
+4. Start LM Studio (or another local LLM endpoint) at:
+   ```
+   http://localhost:1234/v1/chat/completions
+   ```
+
+5. Launch the Flask app:
+   ```bash
+   python app.py
+   ```
+
+6. Send requests to the API:
+   ```json
+      curl --location 'http://localhost:5000/v1/chat/completions' \
+      --header 'x-api-key: your_secure_api_key' \
+      --header 'Content-Type: application/json' \
+      --data '{"messages": [{"role": "user", "content": "What are tiny pointers?"}], "stream": false, "include_citations": true}'
+   ```
 
 ---
 
