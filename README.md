@@ -262,6 +262,81 @@ nltk.download('punkt')
 
 ---
 
+## 🧪 Fine-Tuning, Hub Upload, and GGUF Conversion
+
+This project supports fine-tuning a LLaMA-based model with LoRA adapters, saving the merged model, uploading it to the Hugging Face Hub, and converting it to the GGUF format for use with [LM Studio](https://lmstudio.ai/) or other `llama.cpp`-compatible runtimes.
+
+### 🛠️ Training Workflow
+
+The training pipeline includes the following steps:
+
+1. **Model Loading**  
+   Load a LLaMA model (quantized or full precision) from the Hugging Face Hub or local path, adding a `pad_token` if needed.
+
+2. **LoRA Adapter Injection**  
+   Apply lightweight Low-Rank Adaptation (LoRA) layers using `peft` to enable efficient fine-tuning.
+
+3. **Dataset Preparation**  
+   A custom CSV is tokenized using the format:
+   ```
+   Question: <question> Answer: <answer>
+   ```
+   Tokenized examples are padded and truncated to a max length of 512 tokens, and split into train/test sets.
+
+4. **Training with Hugging Face Trainer**  
+   The `Trainer` API handles epoch-level evaluation, early stopping, and saving the best-performing checkpoint. Mixed-precision (`fp16`) training is supported.
+
+5. **Merging LoRA Adapters**  
+   After training, LoRA weights are merged into the base model for deployment using `merge_and_unload()`.
+
+6. **Saving and Uploading to Hugging Face Hub**  
+   The merged model and tokenizer are saved locally and optionally pushed to your Hugging Face repo for sharing and deployment:
+   ```python
+   model.push_to_hub("your-org/your-model-name")
+   tokenizer.push_to_hub("your-org/your-model-name")
+   ```
+
+---
+
+### 🔁 Converting to GGUF for llama.cpp and LM Studio
+
+After training and merging, the model can be converted to the `.gguf` format used by `llama.cpp`, making it compatible with LM Studio and other local inference tools.
+
+To convert:
+
+1. Clone the `llama.cpp` repo (or download the converter script):
+   ```bash
+   git clone https://github.com/ggerganov/llama.cpp
+   cd llama.cpp
+   ```
+
+2. Run the conversion script:
+   ```bash
+   python convert-hf-to-gguf.py \
+       --input_dir ./path/to/merged-model \
+       --output_dir ./path/to/output-gguf \
+       --dtype q8_0
+   ```
+
+3. Load the `.gguf` file in LM Studio or with `llama.cpp`.
+
+> ✅ Supports common quantization formats like `q4_0`, `q8_0`, and `bf16`.
+
+---
+
+### 📦 Output Directory Structure
+
+After full execution, you'll have:
+
+```
+models/
+├── merged-model/               # Merged model with LoRA adapters fused
+├── gguf-out/                   # Converted GGUF file for inference
+├── logs/                       # Trainer logs
+```
+
+---
+
 ## 🧐 Future Extensions
 
 - Add support for metadata indexing (authors, year, abstract).
