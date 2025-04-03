@@ -1,0 +1,38 @@
+# Core NLP
+transformers>=4.38.0
+datasets>=2.16.0
+sentence-transformers
+peft
+accelerate
+scipy
+scikit-learn
+pandas
+nltk
+tqdm
+pydantic
+
+# PDF/XML parsing
+lxml
+beautifulsoup4
+requests
+PyPDF2
+
+# Vector DB and LangChain
+langchain
+langchain-community
+chromadb
+
+# Flask-based RAG app
+Flask
+
+# Evaluation and Visualization
+openai
+matplotlib
+seaborn
+wordcloud
+rouge-score
+evaluate
+
+# Optional: GGUF conversion script dependencies
+protobuf
+huggingface-hub

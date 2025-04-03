@@ -1,6 +1,6 @@
-# domain_rag
+# RAG Pipeline for Domain Specific Applications
 
-**domain_rag** is a utility pipeline for processing domain-specific documents (e.g., academic papers, reports) and converting them into structured and plain-text formats suitable for Retrieval-Augmented Generation (RAG) systems. It leverages GROBID for PDF to XML transformation and custom tools for extracting and cleaning the text for downstream tasks such as document retrieval or fine-tuning.
+**RAG Pipeline for Domain Specific Applications** is a utility pipeline for processing domain-specific documents (e.g., academic papers, reports) and converting them into structured and plain-text formats suitable for Retrieval-Augmented Generation (RAG) systems. It leverages GROBID for PDF to XML transformation and custom tools for extracting and cleaning the text for downstream tasks such as document retrieval or fine-tuning.
 
 ---
 
@@ -334,6 +334,20 @@ models/
 ├── gguf-out/                   # Converted GGUF file for inference
 ├── logs/                       # Trainer logs
 ```
+
+---
+
+### 🔧 Additional Setup Tips
+
+- Make sure `nltk` data is downloaded in any notebook using `punkt`:
+  ```python
+  import nltk
+  nltk.download("punkt")
+  ```
+- `llama-cpp-python` (if you're running GGUF inference locally):
+  ```bash
+  pip install llama-cpp-python
+  ```
 
 ---
 
