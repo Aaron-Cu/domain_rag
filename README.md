@@ -1,29 +1,163 @@
 # RAG Pipeline for Domain Specific Applications
 
-**RAG Pipeline for Domain Specific Applications** is a utility pipeline for processing domain-specific documents (e.g., academic papers, reports) and converting them into structured and plain-text formats suitable for Retrieval-Augmented Generation (RAG) systems. It leverages GROBID for PDF to XML transformation and custom tools for extracting and cleaning the text for downstream tasks such as document retrieval or fine-tuning.
+**RAG Pipeline for Domain Specific Applications** is a modular pipeline for building domain-specific Retrieval-Augmented Generation (RAG) systems that integrate data preprocessing, question-answer generation, and fine-tuning. Developed as part of a case study on disseminating dementia care practices, the framework addresses the challenges of closed-domain QA, including data scarcity, computational constraints, and lack of domain-aligned conversational data.
+
+The pipeline leverages tools like GROBID for structured PDF parsing, RAG for context-aware generation, and PEFT techniques like LoRA/QLoRA for fine-tuning LLMs on specialized datasets.
 
 ---
 
-## 📆 Project Structure
+## 📚 Motivation
+
+General-purpose LLMs lack the specificity needed for niche domains like healthcare. This pipeline addresses that gap by:
+
+- Converting unstructured documents into retrievable formats
+- Generating synthetic domain-specific QA pairs via few-shot prompting
+- Fine-tuning smaller LLMs (e.g., LLaMA3-8B) for improved response relevance
+- Combining retrieval and generation for up-to-date, contextually grounded outputs
+
+> This project powers the dementia care assistant presented in our CHASE ’25 paper.
+
+---
+
+## 📦 Project Structure
 
 ```
 domain_rag/
-|
 ├── data/
-│   ├── pdfs/               # Input folder for raw PDF documents
-│   └── xml_output/         # Output folder for GROBID XML files
-|
+│   ├── pdfs/               # Raw PDF documents
+│   └── xml_output/         # Output from GROBID (TEI XML)
+│
 ├── helper/
-│   ├── grobid_utils.py     # Functions to run GROBID on PDFs
-│   └── tei_utils.py        # Functions to extract and clean TEI XML
-|
-├── README.md               # This file
-└── ...
+│   ├── grobid_utils.py     # GROBID PDF to XML conversion
+│   ├── tei_utils.py        # TEI XML to clean plain-text chunks
+│   ├── finetune_utils.py   # Fine-tuning scripts using PEFT (LoRA/QLoRA)
+│   └── qag_utils.py        # Question-answer generation utilities
+│
+├── rag_app/                # Flask-based RAG interface with vector DB
+├── requirements.txt
+└── README.md               # This file
 ```
 
 ---
 
-## ⚙️ Utilities
+## ⚙️ Preprocessing Pipeline
+
+### PDF → TEI XML → Plain Text Chunks
+
+```python
+from helper.grobid_utils import process_pdfs_in_directory
+from helper.tei_utils import process_tei_xml_files, process_body_xml_to_plain_text
+
+process_pdfs_in_directory("data/pdfs", "data/xml_output")
+process_tei_xml_files()
+process_body_xml_to_plain_text()
+```
+
+- Converts academic PDFs into structured TEI XML via GROBID
+- Extracts and chunks domain-specific text for vector storage and training
+
+Each chunk includes source context, aiding retrieval and grounding.
+
+---
+
+## 💬 RAG Chat System (Flask App)
+
+A local RAG system powered by:
+
+- `sentence-transformers` (`BAAI/bge-m3`) for embeddings
+- Chroma vector DB
+- LM Studio-compatible LLM (e.g., LLaMA3-8B)
+- Domain-aware prompt templates (e.g., dementia caregiving scenarios)
+
+Launch with:
+
+```bash
+cd rag_app
+pip install -r requirements.txt
+python app.py
+```
+
+RAG dynamically integrates external context, enabling precise, up-to-date answers with minimal hallucination.
+
+---
+
+## 🤖 Question-Answer Generation Module
+
+Generates high-quality domain-specific QA pairs from labeled chunks:
+
+```python
+from helper.qag_util import process_all
+df = process_all("qa_generation/input/")
+df.to_csv("qa_output.csv", index=False)
+```
+
+- Uses few-shot prompting tailored to the domain (e.g., dementia care)
+- Supports auto-fix for malformed generations
+- Output: Pandas DataFrame with question, answer, context chunk
+
+These QA pairs feed into fine-tuning or evaluation workflows.
+
+---
+
+## 🧠 Fine-Tuning + LoRA/QLoRA
+
+This pipeline fine-tunes compact LLMs with LoRA/QLoRA using synthetic QA:
+
+1. Load a base model (e.g., LLaMA3-8B)
+2. Inject LoRA adapters
+3. Tokenize QA pairs:
+   ```
+   Question: <q> Answer: <a>
+   ```
+4. Train with Hugging Face `Trainer` (supports fp16 + early stopping)
+5. Merge adapters and save
+
+Optional: Push to Hugging Face or convert to `.gguf`:
+
+```bash
+python convert-hf-to-gguf.py \
+  --input_dir ./models/merged \
+  --output_dir ./models/gguf \
+  --dtype q8_0
+```
+
+---
+
+## 📊 Evaluation
+
+Our CHASE ’25 paper benchmarks this framework with:
+
+- BLEU
+- ROUGE-1, ROUGE-2, ROUGE-L, ROUGE-LSUM
+- F-measure (precision + recall)
+
+> RAG + Med-LLaMA (our fine-tuned model) achieved the best scores across all metrics, demonstrating the effectiveness of combining retrieval with parameter-efficient fine-tuning.
+
+---
+
+## 🔭 Future Work
+
+- Integrate metadata indexing (authors, publication year)
+- Expand template library for more domains
+- Develop GUI + CLI wrappers for non-technical users
+
+---
+
+## 🧪 Use Cases
+
+- Domain-specific chat assistants (e.g., dementia caregiving, legal aid)
+- Dataset synthesis for low-resource fields
+- QA benchmarking for fine-tuned LLMs
+
+---
+
+## 📄 License
+
+MIT License
+
+---
+
+# ⚙️ More on the Utilities 
 
 ### GROBID PDF Processing
 
@@ -51,30 +185,6 @@ process_body_xml_to_plain_text()
 - `process_tei_xml_files()`: Extracts relevant metadata and structural content.
 - `process_body_xml_to_plain_text()`: Converts the body text of XML documents into clean, retrievable plain text format for downstream RAG or NLP pipelines.
 
----
-
-## 🚀 Use Case
-
-This toolchain is especially useful in domain-specific RAG systems where clean, structured data from academic or technical PDFs is needed for building vector databases, knowledge bases, or context-aware LLM applications.
-
----
-
-## ✅ Requirements
-
-Install the required Python dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-### `requirements.txt`
-
-```
-lxml
-beautifulsoup4
-tqdm
-requests
-```
 
 You’ll also need a running [GROBID](https://github.com/kermitt2/grobid) server (Java-based). Start it using:
 
@@ -221,7 +331,7 @@ Each input `.json` file must contain a list of dictionaries with at least a `Chu
 
 #### 1. **Import the module**
 ```python
-from helpers.qag_util import process_all
+from helper.qag_util import process_all
 ```
 
 #### 2. **Run the pipeline**
@@ -240,25 +350,6 @@ df.to_csv("generated_qa.csv", index=False)
 | `answer`    | Answer generated using a second client (e.g. local RAG app)   |
 | `head`      | Title of the context chunk (if provided)                      |
 | `text`      | Original input text chunk                                     |
-
----
-
-### ⚙️ Requirements
-
-- [LM Studio](https://lmstudio.ai/) running locally with a chat-compatible LLM
-- Previously Mentioned RAG app
-- Python packages:
-  - `pandas`
-  - `nltk`
-  - `langchain`
-  - `scipy`, `sklearn`
-  - `tqdm`
-  - `pydantic`
-- Download required NLTK data:
-```python
-import nltk
-nltk.download('punkt')
-```
 
 ---
 
@@ -350,22 +441,3 @@ models/
   ```
 
 ---
-
-## 🧐 Future Extensions
-
-- Add support for metadata indexing (authors, year, abstract).
-- Integrate chunking and embedding pipeline.
-- Add CLI and GUI wrappers for easier batch processing.
-
----
-
-## 🤝 Contributing
-
-Feel free to open issues or submit PRs if you’d like to contribute!
-
----
-
-## 📄 License
-
-MIT License
-
