@@ -1,4 +1,3 @@
-# llm_utils.py
 from services.config import BASE_TEMPLATE, TEMPLATES
 from langchain.prompts.chat import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 import requests

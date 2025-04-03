@@ -1,4 +1,3 @@
-# file_utils.py
 import os
 import hashlib
 import shutil

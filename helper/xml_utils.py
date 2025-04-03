@@ -1,7 +1,3 @@
-# ===========================
-# xml_utils.py
-# ===========================
-
 from bs4 import BeautifulSoup
 from typing import List, Tuple
 

@@ -3,7 +3,6 @@ import requests
 import time
 import logging
 
-# Set up logging (you can configure this in your main script)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 

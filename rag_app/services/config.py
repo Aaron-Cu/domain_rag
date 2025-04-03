@@ -1,4 +1,3 @@
-# config.py
 FILES_DIRECTORY = "Plain_Text"
 PERSIST_DIRECTORY = "./chroma_db"
 CHECKSUM_FILE = "./chroma_db/checksum.txt"

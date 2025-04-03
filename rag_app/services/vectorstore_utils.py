@@ -1,4 +1,3 @@
-# vectorstore_utils.py
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 

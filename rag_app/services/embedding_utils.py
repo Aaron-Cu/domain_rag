@@ -1,4 +1,3 @@
-# embedding_utils.py
 from sentence_transformers import SentenceTransformer
 import torch
 
